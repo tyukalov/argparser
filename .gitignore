@@ -1,0 +1,5 @@
+alg.*
+test*
+*.sh
+*.bat
+
