@@ -32,29 +32,21 @@
 //#define DEB
 
 static void transpose(RETOPT, RETOPT);
-static int FindOption(RETOPT, char*, int);
+int FindOption(RETOPT, char*, int);
 
 static void transpose(RETOPT x, RETOPT y)
 {
 	if(x!=y)
 	{
-#ifdef DEB
-		printf("Bylo x %s\n", x->options);
-		printf("Bylo y %s\n", y->options);
-#endif
 		OPTIONS var 	= *x;
 		x->value	= y->value;
 		x->options	= y->options;
 		y->value	= var.value;
 		y->options	= var.options;
-#ifdef DEB
-		printf("Stalo x %s\n", x->options);
-		printf("Stalo y %s\n", y->options);
-#endif
 	}
 }
 
-static int FindOption(RETOPT ptrn, char *opt, int len)
+int FindOption(RETOPT ptrn, char *opt, int len)
 {
 	int  result = 0;
 	OPTIONS var;
@@ -70,9 +62,6 @@ int argparse(ARGPARSE_ARG args, RETOPT ptrn, int len)
 {
 	char	*popt, *varval, buf[MAX_OPTION_SIZE];
 	int	gonumber, pbuf, count, result = 0;
-#ifdef DEB
-					printf("%s\n", args.argv[1]);
-#endif
 	for(count=1; count < args.argc; count++)
 	{
 		if(result == len) return result;
@@ -95,9 +84,6 @@ int argparse(ARGPARSE_ARG args, RETOPT ptrn, int len)
 				else
 				{
 					strcpy(buf, popt);
-#ifdef DEB
-					printf("%s\n", popt);
-#endif
 				}
 			}								/* TODO Отрефакторить! Два раза strcpy(buf, popt) */
 			gonumber = FindOption(ptrn, buf, len);
@@ -134,6 +120,3 @@ int argparse(ARGPARSE_ARG args, RETOPT ptrn, int len)
 	}
 	return result;
 }
-
-
-
