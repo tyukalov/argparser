@@ -4,6 +4,7 @@
 #define FALSE			0x0
 #define ILLEGAL_USE_OPTIONS	-0x1000
 #define MISSING_VALUE		-0x2000
+typedef int errcode;
 typedef struct {
 	char		prefix;
 	char		separator;
@@ -22,3 +23,4 @@ typedef struct {
 
 int argparse(ARGPARSE_ARG, RETOPT, int);
 int FindOption(RETOPT, char*, int);
+void fprinterror(FILE *fd, errcode err, char **argv);

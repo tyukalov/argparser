@@ -120,3 +120,13 @@ int argparse(ARGPARSE_ARG args, RETOPT ptrn, int len)
 	}
 	return result;
 }
+
+void fprinterror(FILE *fd, errcode err, char **argv)
+{
+	switch(err)
+	{
+		case ILLEGAL_USE_OPTIONS: {fprintf(fd, "Incorrect use of the option\n"); break;};
+		case MISSING_VALUE: {fprintf(fd, "Missing option value\n"); break;};
+		default: fprintf(fd, "Unknown options %s\n", argv[-err]);
+	}
+}
