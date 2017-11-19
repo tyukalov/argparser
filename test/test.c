@@ -18,27 +18,40 @@
 #include "../argparser.h"
 void main(int argc, char* arg[])
 {
-  /* В файле option.h задаются параметры marg и ptrn */
+  /* В файле option.h задаются параметры marg */
 #include "option.h"
   int c;
-  int num = argparse(marg, ptrn, OPT_LEN);
-	printf("%d\n", num);
-	if(num<0)
+  OPTARG num = argparse(marg);
+  POPTION popt;
+  PARGUMENTS parg;
+  if(num.result)
+    {
+      if(num.result == ILLEGAL_USE_OPTIONS)
 	{
-		if(num == ILLEGAL_USE_OPTIONS)
-		{
-			printf("Error! Illegal use of options\n");
-		}
-		else if(num == MISSING_VALUE)
-		{
-			printf("Error! Missing value from option!\n");
-		}
-		else{
-			printf("Unknown option '%s'\n", arg[-num]);
-		}
+	  printf("Error! Illegal use of options\n");
 	}
-	for(c=0; c<num; c++)
+      else if(num.result == MISSING_VALUE)
 	{
-		printf("Option %s, value %s\n", ptrn[c].options, ptrn[c].value);
+		printf("Error! Missing value from option!\n");
 	}
+      else if (num.result == UNKNOWN_OPTION)
+	{
+		printf("Unknown option '%s'\n", arg[num.erropt]);
+	}
+      argclean(num);
+      return;
+    }
+  popt = num.opt;
+  while(popt)
+    {
+      printf("Option %s, value %s\n", popt->option, popt->value);
+      popt = popt->next;
+    }
+  parg = num.arg;
+  while(parg)
+    {
+      printf("ARGUMENT %s\n", parg->argument);
+      parg = parg->next;
+    }
+  argclean(num);
 }

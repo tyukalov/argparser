@@ -19,25 +19,69 @@
 #define SPACE			' '
 #define TRUE			0x1
 #define FALSE			0x0
-#define ILLEGAL_USE_OPTIONS	-0x1000
-#define MISSING_VALUE		-0x2000
-typedef int errcode;
-typedef struct {
-	char		prefix;
-	char		separator;
-	int		argc;
-	char		**argv;
-}ARGPARSE_ARG;
+
+#define VALIDATOR(A, R)				\
+  if((A) == NULL){\
+    R.result = MEMORY_ERROR;\
+    return R;\
+  }
+#define INITOPT (POPTION)calloc(1,sizeof(OPTION))
+#define INITARG (PARGUMENTS)calloc(1,sizeof(ARGUMENTS))
+
+#define INIT(F, R, V)\
+  if((F)){\
+    (V) = R.opt = INITOPT;			\
+    F = FALSE;				\
+  }\
+  else\
+    {\
+      (V) = V->next = INITOPT;		\
+    };\
+  VALIDATOR (V, R)
+
+/* ------------------------------------------- Interface -------------------------------------------- */
+/* Strunctures and enums */
+typedef enum {
+  NORMAL  = 0,
+  ILLEGAL_USE_OPTIONS ,
+  MISSING_VALUE,
+  UNKNOWN_OPTION,
+  MEMORY_ERROR,
+} errcode;
 
 typedef struct {
-	char		*options;
-	union{
-		int	flag;
-		char	*value;
-	};
+  char		*options;
+  int	                 flag;
 } OPTIONS, *RETOPT;
 
 
-int argparse(ARGPARSE_ARG, RETOPT, int);
-int FindOption(RETOPT, char*, int);
-void fprinterror(FILE *fd, errcode err, char **argv);
+typedef struct {
+  char		   prefix;
+  char		   separator;
+  int		           argc;
+  char		   **argv;
+  int                    len;
+  RETOPT      opts;
+}ARGPARSE_ARG;
+
+typedef struct OPTION{
+  char   *option;
+  char   *value;
+  struct OPTION *next;
+} OPTION, *POPTION;
+
+typedef struct ARGUMENTS{
+  char   *argument;
+  struct ARGUMENTS *next;
+} ARGUMENTS, *PARGUMENTS;
+
+typedef struct{
+  errcode   result;
+  int erropt;
+  POPTION   opt;
+  PARGUMENTS   arg;
+} OPTARG;
+
+/* Functions */
+OPTARG argparse(ARGPARSE_ARG);
+void argclean(OPTARG);

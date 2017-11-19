@@ -16,101 +16,123 @@
 /* Igor 'sp_r00t' Tyukalov <tyukalov@bk.ru> */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "argparser.h"
 #include <string.h>
 
 
-static void transpose(RETOPT, RETOPT);
-int FindOption(RETOPT, char*, int);
-
-static void
-transpose(RETOPT x, RETOPT y)
-{
-	if(x!=y)
-	{
-		OPTIONS var 	= *x;
-		x->value	= y->value;
-		x->options	= y->options;
-		y->value	= var.value;
-		y->options	= var.options;
-	}
-}
-
-int
-FindOption(RETOPT ptrn, char *opt, int len)
+static int
+FindOption(ARGPARSE_ARG args, char *opt)
 {
 	int  result = 0;
 	OPTIONS var;
-	for(; result < len; result++)
+	for(; result < args.len; result++)
 	{
-		var = ptrn[result];
+		var = args.opts[result];
 		if(!strcmp(var.options, opt)) return result;
 	}
 	return -1;
 }
 
-int
-argparse(ARGPARSE_ARG args, RETOPT ptrn, int len)
+
+OPTARG
+argparse(ARGPARSE_ARG args)
 {
-	char	*popt, *varval, buf[MAX_OPTION_SIZE];
-	int	gonumber, pbuf, count, result = 0;
-	for(count=1; count < args.argc; count++)
+  int count, pbuf, gonumber, valflag = TRUE, beginoptflag = TRUE, beginargflag = TRUE;
+  char  *popt, *varval, buf[MAX_OPTION_SIZE];
+  OPTARG RESULT;
+  POPTION varopt;
+  PARGUMENTS vararg;
+  RESULT.result = 0;
+  RESULT.opt = RESULT.arg = NULL;
+  for(count=1; count < args.argc; count++)
+    {
+      if(*(args.argv[count]) == args.prefix)
 	{
-		if(result == len) return result;
-		if(*(args.argv[count]) == args.prefix)
+	  popt = args.argv[count] + 1;
+	  if(args.separator == SPACE)
+	    {
+	      varval = args.argv[count+1];
+	      strcpy(buf, popt);
+	    }
+	  else
+	    {
+	      if(varval=strchr(popt, (int)args.separator))
 		{
-			popt = args.argv[count] + 1;
-			if(args.separator == SPACE)
-			{
-				varval = args.argv[count+1];
-				strcpy(buf, popt);
-			}
-			else
-			{
-				if(varval=strchr(popt, (int)args.separator))
-				{
-					strncpy(buf, popt, (varval - popt));
-					buf[varval-popt] = 0;			/* Завершающий ноль */
-					varval++;				/* Вырезаем символ разделителя */
-				}
-				else
-				{
-					strcpy(buf, popt);
-				}
-			}								/* TODO Отрефакторить! Два раза strcpy(buf, popt) */
-			gonumber = FindOption(ptrn, buf, len);
-			if(gonumber >= 0)
-			{
-				if(ptrn[gonumber].flag == TRUE)
-				{
-					if(!varval || (*varval == args.prefix)) return MISSING_VALUE;
-					ptrn[gonumber].value = varval;
-				}
-				transpose(&ptrn[gonumber], &ptrn[result]);
-				result++;
-			}
-			else
-			{
-				pbuf = strlen(buf) - 1;
-				for(; pbuf>=0; pbuf--)
-				{
-					gonumber = FindOption(ptrn, buf + pbuf, len);
-					if(gonumber >= 0)
-					{
-						if(ptrn[gonumber].flag == TRUE) return ILLEGAL_USE_OPTIONS;
-						*(buf + pbuf) = 0;
-						transpose(&ptrn[gonumber], &ptrn[result]);
-						result++;				/* TODO Отрефакторить! */
-					}
-					else
-					{
-						return (-count);
-					}
-				}
-			}
+		  strncpy(buf, popt, (varval - popt));
+		  buf[varval-popt] = 0;			/* Завершающий ноль */
+		  varval++;				/* Вырезаем символ разделителя */
 		}
+	      else
+		{
+		  strcpy(buf, popt);
+		}
+	    }							
+	  gonumber = FindOption(args, buf);
+	  if(gonumber >= 0)
+	    {
+	      if(args.opts[gonumber].flag == TRUE)
+		{
+		  INIT(beginoptflag, RESULT, varopt);
+		  if(!varval || (*varval == args.prefix))
+		    {
+		      RESULT.result = MISSING_VALUE;
+		      return RESULT;
+		    }
+		  varopt->value = varval;
+		  if(args.separator == SPACE) valflag = FALSE;
+		}
+	      varopt->option = args.opts[gonumber].options;
+	    }
+	  else
+	    {
+	      pbuf = strlen(buf) - 1;
+	      for(; pbuf>=0; pbuf--)
+		{
+		  gonumber = FindOption(args, buf + pbuf);
+		  if(gonumber >= 0)
+		    {
+		      if(args.opts[gonumber].flag == TRUE)
+			{
+			  RESULT.result = ILLEGAL_USE_OPTIONS;
+			  return RESULT;
+			}
+		      *(buf + pbuf) = 0;
+		      INIT(beginoptflag, RESULT, varopt);
+		      varopt->option = args.opts[gonumber].options;
+		    }
+		  else
+		    {
+		      RESULT.erropt = count;
+		      RESULT.result = UNKNOWN_OPTION;
+		      return RESULT;
+		    }
+		}
+	    }
 	}
-	return result;
+      else
+	{
+	  if (valflag)
+	    {
+	      if(beginargflag)
+		{
+		  vararg = RESULT.arg = INITARG;
+		  beginargflag = FALSE;
+		}
+	      else
+		{
+		  vararg = vararg->next = INITARG;
+		}
+	      VALIDATOR(vararg, RESULT);
+	      vararg->argument = args.argv[count];
+	    }
+	  else
+	    {
+	      valflag = TRUE;
+	    }
+	}
+    }
+  return RESULT;
 }
 
 void
@@ -123,4 +145,23 @@ fprinterror(FILE *fd, errcode err, char **argv)
 		case MISSING_VALUE: {fprintf(fd, "Missing option value\n"); break;};
 		default: fprintf(fd, "Unknown options %s\n", argv[-err]);
 	}
+}
+
+void
+argclean(OPTARG optarg)
+{
+  POPTION p, popt = optarg.opt;
+  PARGUMENTS a, parg = optarg.arg;
+  while(popt)
+    {
+      p = popt -> next;
+      free(popt);
+      popt = p;
+    };
+  while(parg)
+    {
+      a = parg -> next;
+      free(parg);
+      parg = a;
+    };
 }
