@@ -49,15 +49,21 @@ typedef enum {
   MEMORY_ERROR,
 } errcode;
 
+typedef enum {
+  NONE,
+  REQUIRED,
+  OPTIONAL,
+} optflag;
+
 typedef struct {
   char		*options;
-  int	                 flag;
+  optflag	          flag;
 } OPTIONS, *RETOPT;
 
 
 typedef struct {
-  char		   prefix;
-  char		   separator;
+  const char		   prefix;
+  const char		   separator;
   int		           argc;
   char		   **argv;
   int                    len;
@@ -83,5 +89,5 @@ typedef struct{
 } OPTARG;
 
 /* Functions */
-OPTARG argparse(ARGPARSE_ARG);
+OPTARG argparse(const ARGPARSE_ARG);
 void argclean(OPTARG);

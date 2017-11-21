@@ -22,7 +22,7 @@
 
 
 static int
-FindOption(ARGPARSE_ARG args, char *opt)
+FindOption(const ARGPARSE_ARG args, const char *opt)
 {
 	int  result = 0;
 	OPTIONS var;
@@ -36,7 +36,7 @@ FindOption(ARGPARSE_ARG args, char *opt)
 
 
 OPTARG
-argparse(ARGPARSE_ARG args)
+argparse(const ARGPARSE_ARG args)
 {
   int count, pbuf, gonumber, valflag = TRUE, beginoptflag = TRUE, beginargflag = TRUE;
   char  *popt, *varval, buf[MAX_OPTION_SIZE];
@@ -44,7 +44,8 @@ argparse(ARGPARSE_ARG args)
   POPTION varopt;
   PARGUMENTS vararg;
   RESULT.result = 0;
-  RESULT.opt = RESULT.arg = NULL;
+  RESULT.opt = (POPTION)NULL;
+  RESULT.arg = (PARGUMENTS)NULL;
   for(count=1; count < args.argc; count++)
     {
       if(*(args.argv[count]) == args.prefix)
@@ -71,16 +72,20 @@ argparse(ARGPARSE_ARG args)
 	  gonumber = FindOption(args, buf);
 	  if(gonumber >= 0)
 	    {
-	      if(args.opts[gonumber].flag == TRUE)
+	      INIT(beginoptflag, RESULT, varopt);
+	      if(args.opts[gonumber].flag == REQUIRED || args.opts[gonumber].flag == OPTIONAL)
 		{
-		  INIT(beginoptflag, RESULT, varopt);
-		  if(!varval || (*varval == args.prefix))
+		  if((!varval || (*varval == args.prefix)) && args.opts[gonumber].flag == REQUIRED)
 		    {
 		      RESULT.result = MISSING_VALUE;
 		      return RESULT;
 		    }
+		  else if(varval && *varval == args.prefix && args.opts[gonumber].flag == OPTIONAL)
+		    {
+		      varval = NULL;
+		    }
 		  varopt->value = varval;
-		  if(args.separator == SPACE) valflag = FALSE;
+		  if(args.separator == SPACE && args.opts[gonumber].flag == REQUIRED) valflag = FALSE;
 		}
 	      varopt->option = args.opts[gonumber].options;
 	    }
@@ -88,11 +93,12 @@ argparse(ARGPARSE_ARG args)
 	    {
 	      pbuf = strlen(buf) - 1;
 	      for(; pbuf>=0; pbuf--)
+		/*When passing an optional parameter, the option must be seperate! */ 
 		{
 		  gonumber = FindOption(args, buf + pbuf);
 		  if(gonumber >= 0)
 		    {
-		      if(args.opts[gonumber].flag == TRUE)
+		      if(args.opts[gonumber].flag == REQUIRED) /* The option with the required parameter must stand alone */
 			{
 			  RESULT.result = ILLEGAL_USE_OPTIONS;
 			  return RESULT;

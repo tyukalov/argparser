@@ -1,11 +1,11 @@
 /* Initialization */
 #define OPT_LEN  5
 OPTIONS arr[5] ={
-  {"p", FALSE},
-  {"t", FALSE},
-  {"-ten", TRUE},
-  {"v", FALSE},
-  {"b", TRUE}
+  {"p", NONE},
+  {"t", OPTIONAL},
+  {"-ten", REQUIRED},
+  {"v", NONE},
+  {"b", REQUIRED}
 };
 ARGPARSE_ARG marg = {
   '-',
