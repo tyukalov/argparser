@@ -43,7 +43,7 @@ argparse(const ARGPARSE_ARG args)
   OPTARG RESULT;
   POPTION varopt;
   PARGUMENTS vararg;
-  RESULT.result = 0;
+  RESULT.result = AP_NORMAL;
   RESULT.opt = (POPTION)NULL;
   RESULT.arg = (PARGUMENTS)NULL;
   for(count=1; count < args.argc; count++)
@@ -73,19 +73,19 @@ argparse(const ARGPARSE_ARG args)
 	  if(gonumber >= 0)
 	    {
 	      INIT(beginoptflag, RESULT, varopt);
-	      if(args.opts[gonumber].flag == REQUIRED || args.opts[gonumber].flag == OPTIONAL)
+	      if(args.opts[gonumber].flag == AP_REQUIRED || args.opts[gonumber].flag == AP_OPTIONAL)
 		{
-		  if((!varval || (*varval == args.prefix)) && args.opts[gonumber].flag == REQUIRED)
+		  if((!varval || (*varval == args.prefix)) && args.opts[gonumber].flag == AP_REQUIRED)
 		    {
-		      RESULT.result = MISSING_VALUE;
+		      RESULT.result = AP_MISSING_VALUE;
 		      return RESULT;
 		    }
-		  else if(varval && *varval == args.prefix && args.opts[gonumber].flag == OPTIONAL)
+		  else if(varval && *varval == args.prefix && args.opts[gonumber].flag == AP_OPTIONAL)
 		    {
 		      varval = NULL;
 		    }
 		  varopt->value = varval;
-		  if(args.separator == SPACE && args.opts[gonumber].flag == REQUIRED) valflag = FALSE;
+		  if(args.separator == SPACE && args.opts[gonumber].flag == AP_REQUIRED) valflag = FALSE;
 		}
 	      varopt->option = args.opts[gonumber].options;
 	    }
@@ -98,9 +98,9 @@ argparse(const ARGPARSE_ARG args)
 		  gonumber = FindOption(args, buf + pbuf);
 		  if(gonumber >= 0)
 		    {
-		      if(args.opts[gonumber].flag == REQUIRED) /* The option with the required parameter must stand alone */
+		      if(args.opts[gonumber].flag == AP_REQUIRED) /* The option with the required parameter must stand alone */
 			{
-			  RESULT.result = ILLEGAL_USE_OPTIONS;
+			  RESULT.result = AP_ILLEGAL_USE_OPTIONS;
 			  return RESULT;
 			}
 		      *(buf + pbuf) = 0;
@@ -110,7 +110,7 @@ argparse(const ARGPARSE_ARG args)
 		  else
 		    {
 		      RESULT.erropt = count;
-		      RESULT.result = UNKNOWN_OPTION;
+		      RESULT.result = AP_UNKNOWN_OPTION;
 		      return RESULT;
 		    }
 		}
@@ -142,18 +142,6 @@ argparse(const ARGPARSE_ARG args)
 }
 
 void
-fprinterror(FILE *fd, errcode err, char **argv)
-{
-  /* TODO Изменить реализацию! */
-	switch(err)
-	{
-		case ILLEGAL_USE_OPTIONS: {fprintf(fd, "Incorrect use of the option\n"); break;};
-		case MISSING_VALUE: {fprintf(fd, "Missing option value\n"); break;};
-		default: fprintf(fd, "Unknown options %s\n", argv[-err]);
-	}
-}
-
-void
 argclean(OPTARG optarg)
 {
   POPTION p, popt = optarg.opt;
@@ -170,4 +158,21 @@ argclean(OPTARG optarg)
       free(parg);
       parg = a;
     };
+}
+
+/* Find option */
+int
+findopt(OPTARG a, const char *o,  char **value)
+{
+  POPTION opts = a.opt;
+  while(opts)
+    {
+      if(!strcmp(opts->option, o))
+	{
+	  *value = opts->value;
+	  return 0;
+	}
+      opts = opts->next;
+    }
+  return -1;
 }

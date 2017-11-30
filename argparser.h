@@ -22,7 +22,7 @@
 
 #define VALIDATOR(A, R)				\
   if((A) == NULL){\
-    R.result = MEMORY_ERROR;\
+    R.result = AP_MEMORY_ERROR;\
     return R;\
   }
 #define INITOPT (POPTION)calloc(1,sizeof(OPTION))
@@ -42,17 +42,17 @@
 /* ------------------------------------------- Interface -------------------------------------------- */
 /* Strunctures and enums */
 typedef enum {
-  NORMAL  = 0,
-  ILLEGAL_USE_OPTIONS ,
-  MISSING_VALUE,
-  UNKNOWN_OPTION,
-  MEMORY_ERROR,
+  AP_NORMAL  = 0,
+  AP_ILLEGAL_USE_OPTIONS ,
+  AP_MISSING_VALUE,
+  AP_UNKNOWN_OPTION,
+  AP_MEMORY_ERROR,
 } errcode;
 
 typedef enum {
-  NONE,
-  REQUIRED,
-  OPTIONAL,
+  AP_NONE,
+  AP_REQUIRED,
+  AP_OPTIONAL,
 } optflag;
 
 typedef struct {
@@ -91,3 +91,4 @@ typedef struct{
 /* Functions */
 OPTARG argparse(const ARGPARSE_ARG);
 void argclean(OPTARG);
+int findopt(OPTARG, const char*, char**);

@@ -26,15 +26,15 @@ void main(int argc, char* arg[])
   PARGUMENTS parg;
   if(num.result)
     {
-      if(num.result == ILLEGAL_USE_OPTIONS)
+      if(num.result == AP_ILLEGAL_USE_OPTIONS)
 	{
 	  printf("Error! Illegal use of options\n");
 	}
-      else if(num.result == MISSING_VALUE)
+      else if(num.result == AP_MISSING_VALUE)
 	{
 		printf("Error! Missing value from option!\n");
 	}
-      else if (num.result == UNKNOWN_OPTION)
+      else if (num.result == AP_UNKNOWN_OPTION)
 	{
 		printf("Unknown option '%s'\n", arg[num.erropt]);
 	}
