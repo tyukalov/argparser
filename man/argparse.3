@@ -1,0 +1,97 @@
+.TH argparse 3 "November 30, 2017" "" "GNU argparser"
+
+.SH НАЗВАНИЕ
+argparse \- парсер аргументов командной строки
+
+.SH СИНТАКСИС
+.B #include "argparser.h"
+.br
+.B OPTARG argparse (const ARGPARSE_ARG arg);
+.br
+
+.SH ОПИСАНИЕ
+Функция \fB argparse \fR принимает в качестве аргумента структуру типа ARGPARSE_ARG, состоящую из следующих полей:
+\fB const char prefix \fR
+.RS 4
+-префикс опции;
+.RE
+\fB const char separator \fR
+.RS 4
+-разделитель опции и значения (пробел тоже указывается);
+.RE
+\fB int argc \fR
+.RS 4
+- параметр argc функции main;
+.RE
+\fB char **argv \fR
+.RS 4
+- параметр argv функции main;
+.RE
+\fB int len \fR
+.RS 4
+- длина списка опций;
+.RE
+\fB RETOPT opts \fR
+.RS 4
+- указатель на список элементов типа OPTIONS, которая в свою очередь состоит из полей:
+.RS 4
+\fB char *options \fR
+.RS 4
+- указатель на строку, содержащую имя опции. Префикс не указывается. В случае длинной опции в формате \fB --optionname \fR  и символа '-' в качестве префикса имя опции пишется \fB -optionname \fR, т.е. с одним тире;
+.RE
+\fB optflag flag \fR
+.RS 4
+- флаг, определяющие наличие значения у опции. Имеет возможные значения:
+.br
+\fB AP_NONE \fR - опция не имеет параметров;
+.br
+\fB AP_REQUIRED \fR - опция обязательно должна иметь параметр;
+.br
+\fB AP_OPTIONAL \fR - опция имеет необязательный параметр;
+.br
+
+.SH "КОД ВЫХОДА"
+Подключаемый файл argparser.h определяет следующие коды ошибок (возвращаемые в поле result структуры OPTARG):
+.br
+\fB AP_ILLEGAL_USE_OPTIONS \fR - неправильное использование опций (соединение коротких и длинных опций и т.д.);
+.br
+\fB AP_MISSING_VALUE \fR - отсутствует значение опции, заданной со спецификатором AP_REQUIRED;
+.br
+\fB AP_UNKNOWN_OPTION \fR - неизвестная опция (в поле erropt структуры OPTARG помещается позиция этой опции в списке argv);
+.br
+\fB AP_MEMORY_ERROR \fR - ошибка выделения памяти;
+.br
+В случае нормального завершения работы значение result равно AP_NORMAL.
+.br
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Возвращает структуру OPTARG, состоящую из полей:
+\fB errcode result \fR
+.RS 4
+- статус завершения (см. EXIT STATUS);
+.RE
+\fB int erropt \fR
+.RS 4
+- дополнительная характеристика ошибки (см. EXIT STATUS);
+.RE
+\fB POPTION opt \fR
+.RS 4
+- указатель на связный список, содержащий найденные опции и их возможные значения. Состоит из полей:
+\fB char *option \fR
+.RS 4
+- имя опции;
+.RE
+\fB char *value \fR
+.RS 4
+- параметр опции;
+.RE
+\fB struct OPTION *next \fR
+.RS 4
+- указатель на следующий элемент списка. Равен NULL для последней обнаруженной опции;
+.RE
+.RE
+\fB PARGUMENTS arg \fR - указатель на связный список аргументов (не опций).
+
+.SH "СМОТРИТЕ ТАКЖЕ"
+findopt(3), argclean(3)
+

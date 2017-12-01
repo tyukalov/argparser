@@ -1,0 +1,22 @@
+.TH argclean 3 "December 1, 2017" "" "GNU argparser"
+
+.SH НАЗВАНИЕ
+argclean \- функция, освобождающая память, выделенную при вызове \fB argparse \fR
+
+.SH СИНТАКСИС
+.B #include "argparser.h"
+.br
+.B void argclean (OPTARG opt);
+.br
+
+.SH ОПИСАНИЕ
+Функция принимает следующие аргументы:
+.PP
+\fB OPTARG opt \fR
+.RS 4
+Структура, полученная от функции \fB argparse \fR
+.RE
+
+.SH "СМОТРИТЕ ТАКЖЕ"
+argparse(3), findopt(3)
+
