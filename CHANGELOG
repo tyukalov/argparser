@@ -17,3 +17,6 @@
 
 	2017-12-02 Igor Tyukalov <tyukalov@bk.ru>
 	* Добавлены man-страницы для функций findopt и argclean.
+
+	2017-12-03 Igor Tyukalov <tyukalov@bk.ru>
+	* Добавлена обработка дополнительного разделителя опции и значения, что позволяет реализовывать как конструкции типа ' --option value' так и '--option=value'.

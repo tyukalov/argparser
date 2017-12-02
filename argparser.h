@@ -15,28 +15,28 @@
  */
 /* Igor 'sp_r00t' Tyukalov <tyukalov@bk.ru> */
 
-#define MAX_OPTION_SIZE		0x100
-#define SPACE			' '
-#define TRUE			0x1
-#define FALSE			0x0
+#define MAX_OPTION_SIZE                     0x100
+#define AP_SPACE			                  ' '
+#define TRUE			                          0x1
+#define FALSE			                          0x0
 
 #define VALIDATOR(A, R)				\
-  if((A) == NULL){\
-    R.result = AP_MEMORY_ERROR;\
-    return R;\
+  if((A) == NULL){                                                \
+    R.result = AP_MEMORY_ERROR;                \
+    return R;                                                           \
   }
 #define INITOPT (POPTION)calloc(1,sizeof(OPTION))
 #define INITARG (PARGUMENTS)calloc(1,sizeof(ARGUMENTS))
 
-#define INIT(F, R, V)\
-  if((F)){\
-    (V) = R.opt = INITOPT;			\
-    F = FALSE;				\
-  }\
-  else\
-    {\
-      (V) = V->next = INITOPT;		\
-    };\
+#define INIT(F, R, V)                                           \
+  if((F)){                                                                   \
+    (V) = R.opt = INITOPT;			                 \
+    F = FALSE;				                         \
+  }                                                                             \
+  else              								 \
+    {                                                                           \
+      (V) = V->next = INITOPT;		                 \
+    };                                                                          \
   VALIDATOR (V, R)
 
 /* ------------------------------------------- Interface -------------------------------------------- */

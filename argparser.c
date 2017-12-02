@@ -38,37 +38,42 @@ FindOption(const ARGPARSE_ARG args, const char *opt)
 OPTARG
 argparse(const ARGPARSE_ARG args)
 {
-  int count, pbuf, gonumber, valflag = TRUE, beginoptflag = TRUE, beginargflag = TRUE;
-  char  *popt, *varval, buf[MAX_OPTION_SIZE];
+  int count, numcopts, gonumber, valflag = TRUE, beginoptflag = TRUE, beginargflag = TRUE;
+  char  *popt, *varval, *varvalex, buf[MAX_OPTION_SIZE];
   OPTARG RESULT;
   POPTION varopt;
   PARGUMENTS vararg;
   RESULT.result = AP_NORMAL;
   RESULT.opt = (POPTION)NULL;
   RESULT.arg = (PARGUMENTS)NULL;
+  /*
+  popt - pointer to current option;
+  varval, varvalex - pointers to option parameter;
+  buf - temporary buffer;
+  gonumber - option number in array args.opts;
+  numcopts - number of combined options;
+  beginoptflag, beginargflag - flags indicating whether to create the appropriate linked lists or they already exist
+  valflag - a flag that indicates whether an element is a parameter
+   */
   for(count=1; count < args.argc; count++)
     {
       if(*(args.argv[count]) == args.prefix)
 	{
 	  popt = args.argv[count] + 1;
-	  if(args.separator == SPACE)
+	  if(args.separator == AP_SPACE)
 	    {
 	      varval = args.argv[count+1];
-	      strcpy(buf, popt);
+	    }
+	  if((varvalex=strchr(popt, (int)args.separator)) || (varvalex=strchr(popt, (int)ALT_SEPARATOR)))
+	    {
+	      strncpy(buf, popt, (varvalex - popt));
+	      buf[varvalex-popt] = 0;			/* trailing zero */
+	      varval = ++varvalex;				/*cut out the symbol of the separator  */
 	    }
 	  else
 	    {
-	      if(varval=strchr(popt, (int)args.separator))
-		{
-		  strncpy(buf, popt, (varval - popt));
-		  buf[varval-popt] = 0;			/* Завершающий ноль */
-		  varval++;				/* Вырезаем символ разделителя */
-		}
-	      else
-		{
-		  strcpy(buf, popt);
-		}
-	    }							
+	      strcpy(buf, popt);
+	    }
 	  gonumber = FindOption(args, buf);
 	  if(gonumber >= 0)
 	    {
@@ -85,17 +90,17 @@ argparse(const ARGPARSE_ARG args)
 		      varval = NULL;
 		    }
 		  varopt->value = varval;
-		  if(args.separator == SPACE && args.opts[gonumber].flag == AP_REQUIRED) valflag = FALSE;
+		  if(args.separator == AP_SPACE && args.opts[gonumber].flag == AP_REQUIRED) valflag = FALSE;
 		}
 	      varopt->option = args.opts[gonumber].options;
 	    }
 	  else
 	    {
-	      pbuf = strlen(buf) - 1;
-	      for(; pbuf>=0; pbuf--)
+	      numcopts = strlen(buf) - 1;
+	      for(; numcopts>=0; numcopts--)
 		/*When passing an optional parameter, the option must be seperate! */ 
 		{
-		  gonumber = FindOption(args, buf + pbuf);
+		  gonumber = FindOption(args, buf + numcopts);
 		  if(gonumber >= 0)
 		    {
 		      if(args.opts[gonumber].flag == AP_REQUIRED) /* The option with the required parameter must stand alone */
@@ -103,7 +108,7 @@ argparse(const ARGPARSE_ARG args)
 			  RESULT.result = AP_ILLEGAL_USE_OPTIONS;
 			  return RESULT;
 			}
-		      *(buf + pbuf) = 0;
+		      *(buf + numcopts) = 0;
 		      INIT(beginoptflag, RESULT, varopt);
 		      varopt->option = args.opts[gonumber].options;
 		    }

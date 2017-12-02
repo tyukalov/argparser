@@ -13,16 +13,20 @@
 
  # Igor Tyukalov <tyukalov@bk.ru> 
 
+ALTSEP = =
+BIN = ./bin
+MTEST = ./test
+
 all:
-	gcc -c argparser.c
+	gcc -DALT_SEPARATOR="'$(ALTSEP)'" -c argparser.c
 	ar rc libargparser.a argparser.o
 	rm *.o
-	mv libargparser.a ./bin
+	mv libargparser.a $(BIN)
 tests:
-	gcc ./test/test.c argparser.c -o _test
-	mv _test ./test/test
+	gcc  -DALT_SEPARATOR="'$(ALTSEP)'" $(MTEST)/test.c argparser.c -o _test
+	mv _test $(MTEST)/test
 debug:
-	gcc -g ./test/test.c argparser.c -o _test_debug
-	mv _test_debug ./test/test_debug
+	gcc -g -DALT_SEPARATOR="'$(ALTSEP)'" $(MTEST)/test.c argparser.c -o _test_debug
+	mv _test_debug $(MTEST)/test_debug
 clean:
-	rm ./test/test ./bin/*
+	rm $(MTEST)/test $(BIN)/*
