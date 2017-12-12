@@ -22,11 +22,12 @@ all:
 	ar rc libargparser.a argparser.o
 	rm *.o
 	mv libargparser.a $(BIN)
-tests:
-	gcc  -DALT_SEPARATOR="'$(ALTSEP)'" $(MTEST)/test.c argparser.c -o _test
+tests: all
+	gcc  -g -DALT_SEPARATOR="'$(ALTSEP)'" $(MTEST)/test.c argparser.c -o _test
 	mv _test $(MTEST)/test
-debug:
-	gcc -g -DALT_SEPARATOR="'$(ALTSEP)'" $(MTEST)/test.c argparser.c -o _test_debug
-	mv _test_debug $(MTEST)/test_debug
 clean:
 	rm $(MTEST)/test $(BIN)/*
+test: tests
+	$(MTEST)/test -pv --ten 25
+	$(MTEST)/test -tp -b 300
+	$(MTEST)/test -p -b 300 -t 800

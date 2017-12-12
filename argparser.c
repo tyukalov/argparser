@@ -90,7 +90,7 @@ argparse(const ARGPARSE_ARG args)
 		      varval = NULL;
 		    }
 		  varopt->value = varval;
-		  if(args.separator == AP_SPACE && args.opts[gonumber].flag == AP_REQUIRED) valflag = FALSE;
+		  if(args.separator == AP_SPACE && (args.opts[gonumber].flag == AP_REQUIRED || args.opts[gonumber].flag == AP_OPTIONAL))  valflag = FALSE;
 		}
 	      varopt->option = args.opts[gonumber].options;
 	    }
